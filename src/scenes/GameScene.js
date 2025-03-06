@@ -113,6 +113,9 @@ class GameScene extends Phaser.Scene {
         this.checkLevelUp();
     }
     
+   // Only showing the createUI method as it's the part that needs modification
+// The rest of GameScene.js remains unchanged
+
     createUI() {
         // Main game container
         const gameContainer = this.add.container(400, 280);
@@ -132,41 +135,38 @@ class GameScene extends Phaser.Scene {
         }).setOrigin(0.5);
         gameContainer.add(headerText);
         
-        // Output text area
+        // Output text area - improved readability
         this.outputText = this.add.text(-330, -120, '', {
             fontFamily: 'Arial',
             fontSize: '16px',
             color: '#FFFFFF',
-            wordWrap: { width: 650 }
+            wordWrap: { width: 650 },
+            lineSpacing: 6  // Added line spacing for better readability
         }).setOrigin(0);
         gameContainer.add(this.outputText);
         
-        // Command input
-        const inputBg = this.add.rectangle(400, 500, 600, 60, 0x1A1A4A)
-            .setStrokeStyle(2, 0x8080FF)
-            .setInteractive();
+        // Command input section - improved visibility
+        // Command input container
+        const commandContainer = this.add.container(400, 500);
         
-        // Placeholder text
-        const placeholderText = this.add.text(110, 500, 'Type command here...', {
+        // Command input background
+        const inputBg = this.add.rectangle(0, 0, 600, 60, 0x1A1A4A)
+            .setStrokeStyle(2, 0x8080FF);
+        commandContainer.add(inputBg);
+        
+        // Command input label
+        const inputLabel = this.add.text(-290, -30, 'ENTER COMMAND:', {
             fontFamily: 'Arial',
-            fontSize: '20px',
-            color: '#8080FF',
-            alpha: 0.7
+            fontSize: '16px',
+            fontStyle: 'bold',
+            color: '#8080FF'
         }).setOrigin(0, 0.5);
-        
-        // Add cursor animation
-        const cursor = this.add.rectangle(270, 500, 2, 30, 0xFFFFFF).setOrigin(0.5);
-        this.tweens.add({
-            targets: cursor,
-            alpha: 0,
-            duration: 500,
-            yoyo: true,
-            repeat: -1
-        });
+        commandContainer.add(inputLabel);
         
         // Create HTML input element for text entry
-        this.commandInput = this.add.dom(400, 500).createFromHTML('<input type="text" id="commandInput" placeholder="Type command here..." style="width:580px;height:50px;font-size:18px;background:rgba(26,26,74,0.8);color:white;border:none;padding:0 10px;border-radius:5px;">');
+        this.commandInput = this.add.dom(0, 0).createFromHTML('<input type="text" id="commandInput" placeholder="Type command here... (e.g. /help, /daily)" style="width:580px;height:50px;font-size:18px;background:rgba(26,26,74,0.8);color:white;border:none;padding:0 10px;border-radius:5px;box-shadow:0 0 5px #4040c0;">');
         this.commandInput.addListener('keydown');
+        commandContainer.add(this.commandInput);
         
         // Listen for key events
         this.commandInput.on('keydown', (event) => {
@@ -180,6 +180,47 @@ class GameScene extends Phaser.Scene {
                 this.processCommand(input);
             }
         });
+        
+        // Send button (helpful for mobile users)
+        const sendButton = this.add.rectangle(320, 0, 80, 50, 0x4040c0)
+            .setStrokeStyle(2, 0x8080FF)
+            .setInteractive();
+        commandContainer.add(sendButton);
+        
+        const sendText = this.add.text(320, 0, 'SEND', {
+            fontFamily: 'Arial',
+            fontSize: '16px',
+            fontStyle: 'bold',
+            color: '#FFFFFF'
+        }).setOrigin(0.5);
+        commandContainer.add(sendText);
+        
+        // Send button hover effect
+        sendButton.on('pointerover', () => {
+            sendButton.setFillStyle(0x5050d0);
+        });
+        
+        sendButton.on('pointerout', () => {
+            sendButton.setFillStyle(0x4040c0);
+        });
+        
+        // Send button click handler
+        sendButton.on('pointerdown', () => {
+            const commandElement = document.getElementById('commandInput');
+            if (commandElement) {
+                const input = commandElement.value;
+                commandElement.value = '';
+                this.processCommand(input);
+            }
+        });
+        
+        // Add command hints
+        const hintText = this.add.text(400, 535, 'Try commands like: /help, /daily, /profile, /quest, or special words like "focus", "channel", "release"', {
+            fontFamily: 'Arial',
+            fontSize: '14px',
+            color: '#8080c0',
+            align: 'center'
+        }).setOrigin(0.5);
         
         // Aura level display
         const auraContainer = this.add.container(400, 50);
@@ -212,6 +253,14 @@ class GameScene extends Phaser.Scene {
         
         // Player avatar and info
         this.createPlayerAvatar();
+        
+        // Focus on the input after UI creation
+        if (this.commandInput) {
+            setTimeout(() => {
+                const input = document.getElementById('commandInput');
+                if (input) input.focus();
+            }, 100);
+        }
     }
     
     createAuraParticles(container) {

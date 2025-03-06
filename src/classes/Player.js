@@ -1,11 +1,13 @@
 // src/classes/Player.js
 
+// src/classes/Player.js
+
 class Player {
     constructor(data = {}) {
         // Basic player information
         this.id = data.id || generateUniqueId();
         this.name = data.name || 'AuraSeeker';
-        this.aura = data.aura || 0;
+        this.aura = data.aura || 500; // Changed from 0 to 500 initial Aura
         this.createdAt = data.createdAt || Date.now();
         
         // Progression tracking
@@ -31,6 +33,8 @@ class Player {
         // Notifications
         this.notifications = data.notifications || [];
     }
+    
+    // [... Rest of the Player class remains unchanged ...]
     
     // Calculated properties
     get auraLevel() {

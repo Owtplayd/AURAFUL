@@ -6,6 +6,7 @@ class MainMenuScene extends Phaser.Scene {
     constructor() {
         super({ key: 'MainMenuScene' });
         this.player = null;
+        this.nameInput = null;
     }
 
     init(data) {
@@ -21,8 +22,8 @@ class MainMenuScene extends Phaser.Scene {
         // Create title and logo
         this.createTitle();
         
-        // Create menu buttons
-        this.createButtons();
+        // Create welcome panel and name input
+        this.createWelcomePanel();
         
         // Play background music
         this.sound.play('menu_music', {
@@ -53,7 +54,7 @@ class MainMenuScene extends Phaser.Scene {
 
     createTitle() {
         // Add game logo
-        const logo = this.add.image(400, 150, 'logo').setScale(1.2);
+        const logo = this.add.image(400, 120, 'logo').setScale(1.2);
         
         // Add glow effect to logo
         this.tweens.add({
@@ -67,7 +68,7 @@ class MainMenuScene extends Phaser.Scene {
         });
         
         // Add tagline
-        this.add.text(400, 240, 'Master Your Aura, Rule the Realm', {
+        this.add.text(400, 200, 'Master Your Aura, Rule the Realm', {
             fontFamily: 'Arial',
             fontSize: '20px',
             color: '#CCCCFF',
@@ -75,72 +76,111 @@ class MainMenuScene extends Phaser.Scene {
         }).setOrigin(0.5);
     }
 
-    createButtons() {
-        // Button styles
-        const buttonWidth = 300;
-        const buttonHeight = 60;
-        const buttonSpacing = 80;
-        const startY = 320;
+    createWelcomePanel() {
+        // Create welcome container
+        const welcomePanel = this.add.container(400, 330);
         
-        // Create main menu buttons
-        const buttons = [
-            { text: 'ENTER GAME', scene: 'GameScene' },
-            { text: 'CHARACTER', callback: this.showCharacter.bind(this) },
-            { text: 'SETTINGS', callback: this.showSettings.bind(this) }
-        ];
+        // Welcome panel background
+        const panelBg = this.add.rectangle(0, 0, 500, 300, 0x10103A, 0.8)
+            .setStrokeStyle(3, 0x8080FF);
+        welcomePanel.add(panelBg);
         
-        buttons.forEach((button, index) => {
-            const y = startY + (index * buttonSpacing);
-            
-            // Button background
-            const buttonBg = this.add.rectangle(400, y, buttonWidth, buttonHeight, 0x4F4FFF)
-                .setStrokeStyle(3, 0x8080FF)
-                .setInteractive();
-            
-            // Button text
-            const buttonText = this.add.text(400, y, button.text, {
-                fontFamily: 'Arial',
-                fontSize: '28px',
-                fontStyle: 'bold',
-                color: '#FFFFFF'
-            }).setOrigin(0.5);
-            
-            // Button hover effect
-            buttonBg.on('pointerover', () => {
-                buttonBg.setFillStyle(0x6464FF);
-                this.tweens.add({
-                    targets: buttonText,
-                    scale: 1.1,
-                    duration: 100
-                });
+        // Welcome message
+        const welcomeText = this.add.text(0, -120, 'WELCOME TO AVRA', {
+            fontFamily: 'Arial',
+            fontSize: '28px',
+            fontStyle: 'bold',
+            color: '#FFFFFF'
+        }).setOrigin(0.5);
+        welcomePanel.add(welcomeText);
+        
+        const welcomeDesc = this.add.text(0, -80, 'A text-command RPG where you collect and manipulate Aura', {
+            fontFamily: 'Arial',
+            fontSize: '16px',
+            color: '#CCCCFF',
+            align: 'center'
+        }).setOrigin(0.5);
+        welcomePanel.add(welcomeDesc);
+        
+        // Name input label
+        const nameLabel = this.add.text(0, -30, 'Enter your name:', {
+            fontFamily: 'Arial',
+            fontSize: '18px',
+            color: '#FFFFFF'
+        }).setOrigin(0.5);
+        welcomePanel.add(nameLabel);
+        
+        // Name input background
+        const inputBg = this.add.rectangle(0, 10, 300, 50, 0x1A1A4A)
+            .setStrokeStyle(2, 0x8080FF);
+        welcomePanel.add(inputBg);
+        
+        // Create HTML input element for name entry
+        this.nameInput = this.add.dom(0, 10).createFromHTML(`<input type="text" id="playerNameInput" value="${this.player ? this.player.name : ''}" placeholder="Enter your name" style="width:280px;height:40px;font-size:18px;background:rgba(26,26,74,0.8);color:white;border:none;padding:0 10px;border-radius:5px;">`);
+        welcomePanel.add(this.nameInput);
+        
+        // Start button
+        const startButton = this.add.rectangle(0, 80, 250, 50, 0x4F4FFF)
+            .setStrokeStyle(3, 0x8080FF)
+            .setInteractive();
+        welcomePanel.add(startButton);
+        
+        const startButtonText = this.add.text(0, 80, 'BEGIN JOURNEY', {
+            fontFamily: 'Arial',
+            fontSize: '22px',
+            fontStyle: 'bold',
+            color: '#FFFFFF'
+        }).setOrigin(0.5);
+        welcomePanel.add(startButtonText);
+        
+        // Settings button
+        const settingsButton = this.add.rectangle(200, 80, 120, 40, 0x6464FF)
+            .setStrokeStyle(2, 0x8080FF)
+            .setInteractive();
+        welcomePanel.add(settingsButton);
+        
+        const settingsButtonText = this.add.text(200, 80, 'SETTINGS', {
+            fontFamily: 'Arial',
+            fontSize: '16px',
+            fontStyle: 'bold',
+            color: '#FFFFFF'
+        }).setOrigin(0.5);
+        welcomePanel.add(settingsButtonText);
+        
+        // Button hover effects
+        startButton.on('pointerover', () => {
+            startButton.setFillStyle(0x6464FF);
+            this.tweens.add({
+                targets: startButtonText,
+                scale: 1.1,
+                duration: 100
             });
-            
-            buttonBg.on('pointerout', () => {
-                buttonBg.setFillStyle(0x4F4FFF);
-                this.tweens.add({
-                    targets: buttonText,
-                    scale: 1,
-                    duration: 100
-                });
+        });
+        
+        startButton.on('pointerout', () => {
+            startButton.setFillStyle(0x4F4FFF);
+            this.tweens.add({
+                targets: startButtonText,
+                scale: 1,
+                duration: 100
             });
-            
-            // Button click handler
-            buttonBg.on('pointerdown', () => {
-                // Play click sound
-                this.sound.play('command_success');
-                
-                // Add click effect
-                this.createButtonClickEffect(400, y);
-                
-                // Handle click based on button type
-                if (button.scene) {
-                    // Transition to the specified scene
-                    this.scene.start(button.scene, { player: this.player });
-                } else if (button.callback) {
-                    // Call the callback function
-                    button.callback();
-                }
-            });
+        });
+        
+        settingsButton.on('pointerover', () => {
+            settingsButton.setFillStyle(0x8080FF);
+        });
+        
+        settingsButton.on('pointerout', () => {
+            settingsButton.setFillStyle(0x6464FF);
+        });
+        
+        // Button click handlers
+        startButton.on('pointerdown', () => {
+            this.startGame();
+        });
+        
+        settingsButton.on('pointerdown', () => {
+            this.showSettings();
         });
         
         // Add version number
@@ -149,6 +189,31 @@ class MainMenuScene extends Phaser.Scene {
             fontSize: '14px',
             color: '#6666AA'
         }).setOrigin(1);
+    }
+
+    startGame() {
+        // Play click sound
+        this.sound.play('command_success');
+        
+        // Get player name from input
+        const nameInput = document.getElementById('playerNameInput');
+        let playerName = 'AuraSeeker';
+        
+        if (nameInput && nameInput.value.trim() !== '') {
+            playerName = nameInput.value.trim();
+        }
+        
+        // Create click effect
+        this.createButtonClickEffect(400, 330);
+        
+        // Update player name if it changed
+        if (this.player) {
+            this.player.name = playerName;
+            this.player.save();
+        }
+        
+        // Transition to the game scene
+        this.scene.start('GameScene', { player: this.player });
     }
 
     createButtonClickEffect(x, y) {
@@ -177,203 +242,6 @@ class MainMenuScene extends Phaser.Scene {
         // Destroy particles after animation completes
         this.time.delayedCall(600, () => {
             particles.destroy();
-        });
-    }
-
-    showCharacter() {
-        // Create character preview panel
-        const panel = this.add.container(400, 300);
-        
-        // Panel background
-        const bg = this.add.rectangle(0, 0, 600, 400, 0x000000, 0.8)
-            .setStrokeStyle(2, 0x8080FF);
-        panel.add(bg);
-        
-        // Panel title
-        const title = this.add.text(0, -170, 'CHARACTER PROFILE', {
-            fontFamily: 'Arial',
-            fontSize: '28px',
-            fontStyle: 'bold',
-            color: '#FFFFFF'
-        }).setOrigin(0.5);
-        panel.add(title);
-        
-        // Character info
-        const infoText = [
-            `Name: ${this.player.name}`,
-            `Aura Level: ${this.player.auraLevel}`,
-            `Rank: ${this.player.rank}`,
-            `Aura: ${this.player.aura.toLocaleString()}`,
-            `Daily Streak: ${this.player.dailyStreak || 0} days`,
-            `Quests Completed: ${this.player.questsCompleted || 0}`,
-            `Duels Won: ${this.player.duelsWon || 0} / Lost: ${this.player.duelsLost || 0}`,
-            `Successful Thefts: ${this.player.theftsSuccessful || 0}`
-        ].join('\n\n');
-        
-        const info = this.add.text(-250, -100, infoText, {
-            fontFamily: 'Arial',
-            fontSize: '18px',
-            color: '#FFFFFF',
-            lineSpacing: 10
-        });
-        panel.add(info);
-        
-        // Avatar
-        const avatarBg = this.add.circle(150, 0, 100, 0x10103A)
-            .setStrokeStyle(2, 0x8080FF);
-        panel.add(avatarBg);
-        
-        // Aura effect around avatar
-        const auraEffect = this.add.circle(150, 0, 110, 0xFFFFFF, 0.3);
-        panel.add(auraEffect);
-        
-        // Pulse animation for aura effect
-        this.tweens.add({
-            targets: auraEffect,
-            radius: 120,
-            alpha: 0.7,
-            duration: 1500,
-            yoyo: true,
-            repeat: -1
-        });
-        
-        // Close button
-        const closeButton = this.add.rectangle(250, -170, 80, 40, 0xFF4444)
-            .setStrokeStyle(2, 0xFF8888)
-            .setInteractive();
-        panel.add(closeButton);
-        
-        const closeText = this.add.text(250, -170, 'CLOSE', {
-            fontFamily: 'Arial',
-            fontSize: '16px',
-            fontStyle: 'bold',
-            color: '#FFFFFF'
-        }).setOrigin(0.5);
-        panel.add(closeText);
-        
-        closeButton.on('pointerdown', () => {
-            panel.destroy();
-        });
-        
-        closeButton.on('pointerover', () => {
-            closeButton.setFillStyle(0xFF8888);
-        });
-        
-        closeButton.on('pointerout', () => {
-            closeButton.setFillStyle(0xFF4444);
-        });
-        
-        // Set up edit name button
-        const editButton = this.add.rectangle(150, 120, 160, 40, 0x44AA44)
-            .setStrokeStyle(2, 0x88FF88)
-            .setInteractive();
-        panel.add(editButton);
-        
-        const editText = this.add.text(150, 120, 'CHANGE NAME', {
-            fontFamily: 'Arial',
-            fontSize: '16px',
-            fontStyle: 'bold',
-            color: '#FFFFFF'
-        }).setOrigin(0.5);
-        panel.add(editText);
-        
-        editButton.on('pointerdown', () => {
-            this.promptChangeName(panel);
-        });
-        
-        editButton.on('pointerover', () => {
-            editButton.setFillStyle(0x88FF88);
-        });
-        
-        editButton.on('pointerout', () => {
-            editButton.setFillStyle(0x44AA44);
-        });
-    }
-
-    promptChangeName(parentPanel) {
-        // Create name change prompt
-        const promptPanel = this.add.container(0, 0);
-        parentPanel.add(promptPanel);
-        
-        // Panel background
-        const bg = this.add.rectangle(0, 0, 400, 200, 0x000000, 0.9)
-            .setStrokeStyle(2, 0x8080FF);
-        promptPanel.add(bg);
-        
-        // Panel title
-        const title = this.add.text(0, -70, 'CHANGE NAME', {
-            fontFamily: 'Arial',
-            fontSize: '22px',
-            fontStyle: 'bold',
-            color: '#FFFFFF'
-        }).setOrigin(0.5);
-        promptPanel.add(title);
-        
-        // Create HTML input element for name entry
-        const nameInput = this.add.dom(0, 0).createFromHTML('<input type="text" id="nameInput" placeholder="Enter new name" value="' + this.player.name + '" style="width:300px;height:40px;font-size:18px;padding:5px;">');
-        promptPanel.add(nameInput);
-        
-        // Confirm button
-        const confirmButton = this.add.rectangle(-80, 70, 120, 40, 0x44AA44)
-            .setStrokeStyle(2, 0x88FF88)
-            .setInteractive();
-        promptPanel.add(confirmButton);
-        
-        const confirmText = this.add.text(-80, 70, 'CONFIRM', {
-            fontFamily: 'Arial',
-            fontSize: '16px',
-            fontStyle: 'bold',
-            color: '#FFFFFF'
-        }).setOrigin(0.5);
-        promptPanel.add(confirmText);
-        
-        // Cancel button
-        const cancelButton = this.add.rectangle(80, 70, 120, 40, 0xFF4444)
-            .setStrokeStyle(2, 0xFF8888)
-            .setInteractive();
-        promptPanel.add(cancelButton);
-        
-        const cancelText = this.add.text(80, 70, 'CANCEL', {
-            fontFamily: 'Arial',
-            fontSize: '16px',
-            fontStyle: 'bold',
-            color: '#FFFFFF'
-        }).setOrigin(0.5);
-        promptPanel.add(cancelText);
-        
-        // Button handlers
-        confirmButton.on('pointerdown', () => {
-            const newName = document.getElementById('nameInput').value.trim();
-            
-            if (newName && newName.length > 0) {
-                this.player.name = newName;
-                this.player.save();
-                
-                // Update the character info panel
-                parentPanel.destroy();
-                this.showCharacter();
-            }
-        });
-        
-        cancelButton.on('pointerdown', () => {
-            promptPanel.destroy();
-        });
-        
-        // Hover effects
-        confirmButton.on('pointerover', () => {
-            confirmButton.setFillStyle(0x88FF88);
-        });
-        
-        confirmButton.on('pointerout', () => {
-            confirmButton.setFillStyle(0x44AA44);
-        });
-        
-        cancelButton.on('pointerover', () => {
-            cancelButton.setFillStyle(0xFF8888);
-        });
-        
-        cancelButton.on('pointerout', () => {
-            cancelButton.setFillStyle(0xFF4444);
         });
     }
 
